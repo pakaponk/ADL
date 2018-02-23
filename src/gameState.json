@@ -1,0 +1,73 @@
+{
+  "entities": [
+    {
+      "name": "Iceman",
+      "life": 100,
+      "attack": 10,
+      "group": "Enemy",
+      "isProjectile": false,
+      "isAttacker": true,
+      "isDefender": true,
+      "isFlipper": false,
+      "isFlippable": true,
+      "horizontalDirection": 1,
+      "verticalDirection": 1,
+      "velocityX": 2.5,
+      "velocityY": 0.0,
+      "x": 6.26,
+      "y": -4.42,
+      "width": 0.64,
+      "height": 0.64
+    }
+  ],
+  "nextStates": [
+    {
+      "entities": [
+        {
+          "name": "Iceman",
+          "life": 100,
+          "attack": 10,
+          "group": "Enemy",
+          "isProjectile": false,
+          "isAttacker": true,
+          "isDefender": true,
+          "isFlipper": false,
+          "isFlippable": true,
+          "horizontalDirection": 1,
+          "verticalDirection": 1,
+          "velocityX": 2.5,
+          "velocityY": 0.0,
+          "x": 6.26,
+          "y": -4.42,
+          "width": 0.64,
+          "height": 0.64
+        }
+      ],
+      "nextStates": []
+    },
+    {
+      "entities": [
+        {
+          "name": "Iceman",
+          "life": 100,
+          "attack": 10,
+          "group": "Enemy",
+          "isProjectile": false,
+          "isAttacker": true,
+          "isDefender": true,
+          "isFlipper": false,
+          "isFlippable": true,
+          "horizontalDirection": 1,
+          "verticalDirection": 1,
+          "velocityX": 2.5,
+          "velocityY": 0.0,
+          "x": 6.26,
+          "y": -4.42,
+          "width": 0.64,
+          "height": 0.64
+        }
+      ],
+      "nextStates": []
+    }
+  ]
+}
