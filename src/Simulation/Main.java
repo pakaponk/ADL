@@ -68,6 +68,7 @@ public class Main {
         JScrollPane scrollPane = new JScrollPane(textArea);
         scrollPane.setPreferredSize(new Dimension(300, 540));
         GameScreen gameScreen = new GameScreen(rootNode, textArea);
+        textArea.setFocusable(false);
 
         frame.setLayout(new BorderLayout());
         frame.add(gameScreen, BorderLayout.CENTER);

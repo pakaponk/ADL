@@ -7,6 +7,8 @@ import ADL.ADLPlayerAction;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 
+import java.math.BigInteger;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -17,13 +19,15 @@ import java.util.stream.Collectors;
  */
 public class GameStateNode {
 
-    private transient GameStateNode prevState;
+    private transient List<GameStateNode> prevStates;
 
     private List<ADLBaseAgent> baseAgents;
 
     private Map<ADLPlayerAction, GameStateNode> nextStates;
 
-    private boolean isDangerousPath;
+    private BigInteger totalSafePath = BigInteger.ONE;
+
+    private BigInteger totalDangerousPath = BigInteger.ZERO;
 
     GameStateNode(List<ADLBaseAgent> baseAgents) {
         this.baseAgents = baseAgents;
@@ -31,9 +35,12 @@ public class GameStateNode {
     }
 
     GameStateNode(GameStateNode prevState, List<ADLBaseAgent> baseAgents) {
-        this.prevState = prevState;
+        this.prevStates = new ArrayList<>();
+        this.prevStates.add(prevState);
         this.baseAgents = baseAgents;
         this.nextStates = new HashMap<>();
+        this.totalSafePath = prevState.totalSafePath;
+        this.totalDangerousPath = prevState.totalDangerousPath;
     }
 
     void addNextState(ADLPlayerAction action, GameStateNode node){
@@ -94,10 +101,10 @@ public class GameStateNode {
                 if (firstAgent.isCollidedWith(secondAgent)) {
                     firstAgent.handleOnCollidedWith(secondAgent);
 
-                    if (firstAgent instanceof ADLPlayer) {
-                        this.isDangerousPath = true;
-                    } else if (secondAgent instanceof ADLPlayer) {
-                        this.isDangerousPath = true;
+                    if ((firstAgent instanceof ADLPlayer && secondAgent.isEnemy() && secondAgent.isAttacker) ||
+                            secondAgent instanceof ADLPlayer && firstAgent.isEnemy() && firstAgent.isAttacker) {
+                        this.totalDangerousPath = this.totalDangerousPath.add(this.totalSafePath);
+                        this.totalSafePath = BigInteger.ZERO;
                     }
                 }
             }
@@ -113,9 +120,24 @@ public class GameStateNode {
                 thisPlayer.getPossibleMoves(this.getEnemyAgents()).equals(nodePlayer.getPossibleMoves(node.getEnemyAgents()));
     }
 
+    public void merge(GameStateNode node) {
+        GameStateNode previousNode = node.getPrevStates().get(0);
+
+        previousNode.getNextStates().entrySet()
+                .stream()
+                .filter(entry -> entry.getValue() == node)
+                .findFirst()
+                .ifPresent(entry -> previousNode.getNextStates().put(entry.getKey(), this));
+
+        this.getPrevStates().add(previousNode);
+
+        this.totalSafePath = this.totalSafePath.add(node.totalSafePath);
+        this.totalDangerousPath = this.totalDangerousPath.add(node.totalDangerousPath);
+    }
+
     //region Getter & Setter Methods
-    public GameStateNode getPrevState() {
-        return prevState;
+    public List<GameStateNode> getPrevStates() {
+        return prevStates;
     }
 
     public Map<ADLPlayerAction, GameStateNode> getNextStates() {
@@ -124,6 +146,14 @@ public class GameStateNode {
 
     public List<ADLBaseAgent> getBaseAgents() {
         return baseAgents;
+    }
+
+    public BigInteger getTotalSafePath() {
+        return totalSafePath;
+    }
+
+    public BigInteger getTotalDangerousPath() {
+        return totalDangerousPath;
     }
     //endregion
 

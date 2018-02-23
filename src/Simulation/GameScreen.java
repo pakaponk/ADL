@@ -64,7 +64,7 @@ public class GameScreen extends JPanel {
                     switch (e.getKeyCode()){
                         case KeyEvent.VK_LEFT:
                             try{
-                                _self.currentNode = _self.currentNode.getPrevState();
+                                _self.currentNode = _self.currentNode.getPrevStates().get(0);
                                 _self.repaint();
                                 _self.round--;
                             }
@@ -129,7 +129,7 @@ public class GameScreen extends JPanel {
                         case KeyEvent.VK_P:
                             try{
                                 for (i = 0;i < 10;i++) {
-                                    _self.currentNode = _self.currentNode.getPrevState();
+                                    _self.currentNode = _self.currentNode.getPrevStates().get(0);
                                 }
                                 _self.repaint();
                                 _self.round -= 10;
@@ -225,7 +225,7 @@ public class GameScreen extends JPanel {
                 .reduce((String result, String current) -> result + " " + current)
                 .ifPresent(text -> g2d.drawString(text, 50, 100));
 
-        g2d.drawString("ID " + currentNode.toString(), 50, 150);
+        g2d.drawString("Total Safe Path: " + currentNode.getTotalSafePath(), 50, 150);
     }
 
     private void drawBaseAgents(Graphics2D g2d) {

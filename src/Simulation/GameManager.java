@@ -6,6 +6,9 @@ import ADL.ADLPlayer;
 import ADL.ADLPlayerAction;
 
 import java.io.IOException;
+import java.math.BigDecimal;
+import java.math.BigInteger;
+import java.math.RoundingMode;
 import java.nio.charset.Charset;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -87,11 +90,13 @@ public class GameManager {
         this.rootGameStateNode = this.createGameStateNode();
 
         int frequency = 2;
-        int totalRound = 700 / frequency;
+        int totalRound = 600 / frequency;
 
         List<GameStateNode> updatingStateNodes = new ArrayList<>();
         List<GameStateNode> nextUpdatingStateNodes = new ArrayList<>();
         nextUpdatingStateNodes.add(this.rootGameStateNode);
+
+        long begin = System.currentTimeMillis();
 
         for (int i = 1;i <= totalRound;i++) {
 
@@ -116,11 +121,11 @@ public class GameManager {
                     player.move(action);
 
                     for (int j = 0; j < frequency;j++) {
+                        nextNode.checkCollisions();
                         nextNode.updateAllADLAgents();
                         player.update();
                         nextNode.spawnADLBaseAgents();
                         //nextNode.printCurrentPosition();
-                        nextNode.checkCollisions();
                         nextNode.destroyADLBaseAgents();
                     }
 
@@ -139,7 +144,7 @@ public class GameManager {
             boolean[] identicalNodes = new boolean[nextUpdatingStateNodes.size()];
             for (int j = 0;j < nextUpdatingStateNodes.size();j++) {
                 GameStateNode firstNode = nextUpdatingStateNodes.get(j);
-                for (int k = j + 1; k < nextUpdatingStateNodes.size();k++) {
+                for (int k = nextUpdatingStateNodes.size() - 1; k >= (j + 1);k--) {
                     if (identicalNodes[k]) {
                         break;
                     }
@@ -150,6 +155,10 @@ public class GameManager {
                         //System.out.println("Identical Node: " + firstNode.toString() + " " + secondNode.toString());
                         identicalNodes[k] = true;
                         totalIdenticalNodes++;
+
+                        firstNode.merge(secondNode);
+
+                        nextUpdatingStateNodes.remove(k);
                     }
                 }
             }
@@ -158,7 +167,15 @@ public class GameManager {
             System.out.println("-------- Round " + i + " END ----------\n");
         }
 
-        System.out.println(this.rootGameStateNode.getNextStates().size());
+        BigInteger totalSafePath = nextUpdatingStateNodes.stream().map(GameStateNode::getTotalSafePath).reduce(BigInteger::add).get();
+        BigInteger totalDangerousPath = nextUpdatingStateNodes.stream().map(GameStateNode::getTotalDangerousPath).reduce(BigInteger::add).get();
+
+        long end = System.currentTimeMillis();
+
+        System.out.println("Total Safe Path: " + totalSafePath + ", Total Dangerous Path: " + totalDangerousPath);
+        System.out.println("Ratio: " + new BigDecimal(totalSafePath).divide(new BigDecimal(totalDangerousPath), 10, RoundingMode.HALF_UP));
+
+        System.out.println("Finished in: " + (end - begin) + " ms");
     }
 
     public void convertGameStateNodeToJSONFile(String directory) throws IOException {
